@@ -1,0 +1,17 @@
+# ignore executable (= no extension) file
+*
+!*/
+!*.*
+
+in/
+out/
+params.h
+
+.vscode/
+
+*.exe
+ans/
+
+.DS_Store
+
+*.dSYM/
