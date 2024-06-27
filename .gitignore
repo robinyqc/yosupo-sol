@@ -15,3 +15,4 @@ ans/
 .DS_Store
 
 *.dSYM/
+*.out

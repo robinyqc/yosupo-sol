@@ -33,13 +33,12 @@ struct BITSet
         for (; x; x -= x & -x) res += t[x];
         return res; 
     }
-    u32 lower_bound(u32 k)
+    u32 operator[](u32 k)
     {
-        u32 tr = rank(k);
         u32 p = 0, s = 0;
         for (u32 i = m; i; i /= 2) {
-            if (p + m <= n && s + t[p + m] <= tr) {
-                p += m;
+            if (p + i <= n && s + t[p + i] <= k) {
+                p += i;
                 s += t[p];
             }
         }
@@ -49,6 +48,8 @@ struct BITSet
 
 signed main() 
 {
+    ios::sync_with_stdio(false);
+    cin.tie(0), cout.tie(0);
     int n, q;
     cin >> n >> q;
     vec<bool> t(n);
@@ -77,14 +78,14 @@ signed main()
             cout << t[k] << '\n';
         }
         else if (op == 3) {
-            auto it = s.lower_bound(k);
+            auto it = s[s.rank(k)];
             if (it != n) cout << it << '\n';
             else cout << "-1\n";
         }
         else {
-            auto it = s.lower_bound(k);
-            if (it != s.begin()) cout << *--it << '\n';
-            else cout << "-1\n";
+            u32 rk = s.rank(k + 1);
+            if (rk == 0) cout << "-1\n";
+            else cout << s[rk - 1] << '\n';
         }
     }
     return 0;

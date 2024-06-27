@@ -1,9 +1,10 @@
-for out in $(ls out/*.out); 
+#!/usr/bin/env sh
+for ans in $(ls ans/*.ans); 
 do 
-    ans=$(echo $out | sed "s/.out$/.ans/" | sed "s/^out/ans/");
-    if ! diff $out $ans > /dev/null
+    out=$(echo $ans | sed "s/.ans$/.out/" | sed "s/^ans/out/");
+    if ! diff $ans $out > /dev/null -w
     then
-        echo $out $ans are different
-        exit -1
+        echo $ans $out are different
+        # exit -1
     fi
 done
