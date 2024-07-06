@@ -20,7 +20,7 @@ struct lf
 {
     mint k, b; // k * x + b
     lf(mint _k = 1, mint _b = 0): k(_k), b(_b) { }
-    mint apply(mint x) { return k * x + b; }
+    mint operator()(mint x) const { return k * x + b; }
     lf operator*(const lf &t) const { return lf(k * t.k, b * t.k + t.b); }
 };
 lf lf_unit() { return lf(); }
@@ -226,7 +226,7 @@ signed main()
             cin >> x >> y >> z;
             odt_split(x);
             odt_split(y);
-            cout << tall.prod(x, y).apply(z).val() << '\n';
+            cout << tall.prod(x, y)(z).val() << '\n';
         }
         else {
             cin >> x >> y;
