@@ -13,9 +13,9 @@ for i in $(ls in/$2*.in); do
     echo "from ${i} into ${ans}"
     
     # Run the program and capture the output and time usage
-    time_usage=$( { /usr/bin/time -p cat $i | ./$1 > $ans; } 2>&1 )
+    time_usage=$( { /usr/bin/time -p ./$1 < $i > $ans; } 2>&1 )
     real_time=$(echo "$time_usage" | grep "real" | awk '{print $2}')
-    
+
     echo "real time: $real_time"
     
     # Update the maximum time usage
