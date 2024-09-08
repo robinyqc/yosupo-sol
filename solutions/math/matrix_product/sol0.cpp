@@ -17,7 +17,7 @@ template<typename T> using vec = vector<T>;
 
 // Matrix product of a and b
 // For generalized matrix product such as (max, +) matrix product, use 
-// Gmaxtrix_product(a, b, unit, plu, mul).
+// Gmaxtrix_product(a, b, zero, plu, mul).
 // T must have default constructor. Operator += and * must be defined on T.
 template<typename T>
 vec<vec<T>> matrix_product(const vec<vec<T>> &a, const vec<vec<T>> &b)
@@ -40,13 +40,13 @@ vec<vec<T>> matrix_product(const vec<vec<T>> &a, const vec<vec<T>> &b)
 // For faster (+, *) matrix product, just use matrix_product(a, b).
 template<typename T, typename MU = multiplies<T>, typename PL = plus<T>>
 vec<vec<T>> Gmatrix_product(const vec<vec<T>> &a, const vec<vec<T>> &b,
-    const T unit = T(),
+    const T zero = T(),
     PL plu = plus<T>(), MU mul = multiplies<T>())
 {
     u32 n = a.size(), m = b.size(), q = b[0].size();
     vec<vec<T>> res(n);
     for (u32 i = 0; i < n; i++) {
-        vec<T> t(q, unit);
+        vec<T> t(q, zero);
         for (u32 k = 0; k < m; k++) {
             T tmp{a[i][k]};
             for (u32 j = 0; j < q; j++) {
@@ -59,7 +59,7 @@ vec<vec<T>> Gmatrix_product(const vec<vec<T>> &a, const vec<vec<T>> &b,
 }
 
 // Similar to matrix_product but has const size of matrices.
-template<typename T, u32 N, u32 M, u32 Q>
+template<typename T, size_t N, size_t M, size_t Q>
 array<array<T, Q>, N> matrix_product(
     const array<array<T, M>, N> &a, 
     const array<array<T, Q>, M> &b)
@@ -77,17 +77,17 @@ array<array<T, Q>, N> matrix_product(
 }
 
 // Similar to Gmatrix_product but has const size of matrices.
-template<typename T, u32 N, u32 M, u32 Q, 
+template<typename T, size_t N, size_t M, size_t Q, 
     typename MU = multiplies<T>, typename PL = plus<T>>
-array<array<T, Q>, N> const_size_Gmatrix_product(
+array<array<T, Q>, N> Gmatrix_product(
     const array<array<T, M>, N> &a, const array<array<T, Q>, M> &b,
-    const T unit = T(),
+    const T zero = T(),
     PL plu = plus<T>(), MU mul = multiplies<T>())
 {
     array<array<T, Q>, N> res{};
     for (u32 i = 0; i < N; i++) {
         array<T, Q> t{};
-        for (u32 j = 0; j < Q; j++) t[j] = unit;
+        for (u32 j = 0; j < Q; j++) t[j] = zero;
         for (u32 k = 0; k < M; k++) {
             T tmp{a[i][k]};
             for (u32 j = 0; j < Q; j++) {

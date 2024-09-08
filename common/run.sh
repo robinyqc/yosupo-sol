@@ -5,6 +5,11 @@ if ! g++ -O2 -std=c++20 $1.cpp -o $1; then
     exit -1
 fi
 
+# check if pwd has a directory named "ans"
+if [ ! -d "ans" ]; then
+    mkdir "ans"
+fi
+
 max_time=0
 
 # Loop through all input files matching the pattern
