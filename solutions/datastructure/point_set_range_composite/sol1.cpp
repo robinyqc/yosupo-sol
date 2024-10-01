@@ -34,6 +34,7 @@ struct CompressedSegmentTree
     }
 
     S prod(u32 l, u32 r) { return prod_rec(l, r, 0, n, 1); }
+    S prod_all() { return d[1]; }
     void set(u32 x, const S &s) { set_rec(s, x, 0, n, 1); }
     S get(u32 x) { return get_rec(x, 0, n, 1); }
 
