@@ -53,11 +53,10 @@ public:
             else p = &((*p)->ls);
         }
         *p = new Node(v, 1);
-        // cerr << "!!!\n";
     }
     DynamicSegmentTree(Self &&v): root(nullptr) { swap(root, v.root); }
     Self &operator=(Self &&v) { swap(root, v.root); return *this; }
-    ~DynamicSegmentTree() { /*clog << "del: " << u64(root) << '\n';*/ delete root; }
+    ~DynamicSegmentTree() { delete root; }
 
     S prod_all() { return root == nullptr ? S(): root->val; }
     void merge(Self &b) 
@@ -96,7 +95,8 @@ public:
         u32 siz;
         bool rev;
         ptr ls, rs;
-        Node(S v = M::un(), u32 s = 0): val(v), siz(s), rev(), ls(nullptr), rs(nullptr) { }
+        Node(S v = M::un(), u32 s = 0)
+            : val(v), siz(s), rev(), ls(nullptr), rs(nullptr) { }
         ~Node()
         {
             delete ls;

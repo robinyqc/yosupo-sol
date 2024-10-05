@@ -21,7 +21,7 @@ template<typename T> using vec = vector<T>;
 template<typename M>
 struct CompressedSegmentTree
 {
-    using S = M::S;
+    using S = typename M::S;
 
     u32 n;
     vec<S> d;
