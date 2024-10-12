@@ -20,6 +20,12 @@ struct SegmentTree
     using S = typename M::S;
     u32 m;
     vec<S> t;
+    SegmentTree() { }
+    SegmentTree(u32 n): m(1)
+    {
+        while (m < n) m *= 2;
+        t.resize(m * 2, M::un());
+    }
     template<typename G>
     SegmentTree(u32 n, G &&g): m(1)
     {
@@ -48,6 +54,8 @@ struct SegmentTree
         }
         return M::op(lres, rres);
     }
+
+    S prod_all() { return t[1]; }
 };
 
 using mint = atcoder::modint998244353;

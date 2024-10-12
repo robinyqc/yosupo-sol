@@ -27,8 +27,15 @@ struct LazySegmentTree
 
 #define __m (1u << log)
 
+    LazySegmentTree() { }
+    LazySegmentTree(u32 n): log(0)
+    {
+        while (__m < n) ++log;
+        d.resize(__m * 2, MS::un());
+        t.resize(__m, MA::un());
+    }
     template<typename G>
-    LazySegmentTree(u32 n, G &&g): log(0), t()
+    LazySegmentTree(u32 n, G &&g): log(0)
     {
         while (__m < n) ++log;
         d.resize(__m * 2, MS::un());
@@ -84,6 +91,8 @@ struct LazySegmentTree
         }
         return MS::op(lres, rres);
     }
+
+    S prod_all() { return d[1]; }
 
     void apply(u32 l, u32 r, const A &a)
     {

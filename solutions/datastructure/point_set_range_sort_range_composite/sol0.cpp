@@ -207,7 +207,6 @@ signed main()
             }
             v.merge(t[*i]);
             tall.set(*i, lf());
-            // assert(t[*i].root == nullptr);
             odt.erase(i++);
         }
     };
