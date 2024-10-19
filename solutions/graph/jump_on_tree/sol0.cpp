@@ -24,6 +24,7 @@ struct TreeDecomposition
     {
         vec<u32> son(n, -1);
 
+        fa[r] = r;
         [r, dfs = [&](auto &&f, u32 x) -> void
         {
             dfn[x] = 1;
@@ -70,6 +71,7 @@ struct TreeDecomposition
         return dep[x] < dep[y] ? x : y;
     }
 
+    // 注意是左闭右闭，这样好描述 “路径” 这一过程。
     vec<pair<u32, u32>> path(u32 x, u32 y)
     {
         static vec<pair<u32, u32>> px, py;
@@ -90,6 +92,19 @@ struct TreeDecomposition
             px.emplace_back(*it);
         }
         return px;
+    }
+
+    // 注意是左闭右开，因为这里不在乎边的顺序，所以左闭右开方便。
+    template<typename F, typename... Args>
+    void operate_path(u32 x, u32 y, F &&f, Args &&... args)
+    {
+        while (top[x] != top[y]) {
+            if (dep[top[x]] < dep[top[y]]) swap(x, y);
+            f(dfn[top[x]], dfn[x] + 1, std::forward<Args>(args)...);
+            x = fa[top[x]];
+        }
+        if (dep[x] < dep[y]) swap(x, y);
+        f(dfn[y], dfn[x] + 1, std::forward<Args>(args)...);
     }
 };
 
