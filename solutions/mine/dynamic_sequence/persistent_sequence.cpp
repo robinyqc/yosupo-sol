@@ -74,7 +74,7 @@ protected:
         using awd_traits = allocator_traits<AllocatorWithDeleter>;
     public:
         using Base::Base;
-        // template<typename U> using rebind = AllocatorWithDeleter<U>;
+        template<typename U> using rebind = AllocatorWithDeleter<U>;
         void operator()(Node *ptr)
         {
             awd_traits::destroy(*this, ptr);
@@ -99,15 +99,17 @@ protected:
         bool rev;
         Ptr ls, rs;
         u32 siz;
-        Node(const S &s = MS::un(), u32 real = 1u): 
-            val(s), 
+        template<typename ...Args, typename = enable_if_t
+            <conjunction_v<negation<is_same<Node, decay_t<Args>>>...>>>
+        Node(Args &&... args): 
+            val(std::forward<Args>(args)...), 
             // [[ds_prd]]
-            prd(s), 
+            prd(val), 
             // [[ds_act]]
             tag(MA::un()), 
             // [[ds_rev]]
             rev(), 
-            ls(), rs(nullptr), siz(real) { }
+            ls(), rs(), siz(1) { }
         ~Node() { /* cerr << "[DEBUG] A node has been destroyed." << endl; */ }
     };
 
@@ -137,7 +139,13 @@ protected:
     {
         x->rev ^= 1;
         swap(x->ls, x->rs);
-        if constexpr (!MS::cm) x->prd = MS::ts(x->prd);
+        if constexpr (!MS::sym) {
+            x->val = MS::ts(x->val);
+        }
+        if constexpr (!MS::cm) {
+            // [[ds_prd]]
+            x->prd = MS::ts(x->prd);
+        }
     }
 
     // [[ds_range_opt]]
@@ -194,14 +202,18 @@ protected:
         if (sls >= k) {
             r = std::move(x);
             // [[ds_no_range_opt]]
-            // if (r->ls) r->ls = new_node(*(r->ls));
+            // if constexpr (persistent) {
+            //     if (r->ls) r->ls = new_node(*(r->ls));
+            // }
             split(std::move(r->ls), k, l, r->ls);
             push_up(r);
         }
         else {
             l = std::move(x);
             // [[ds_no_range_opt]]
-            // if (l->rs) l->rs = new_node(*(l->rs));
+            // if constexpr (persistent) {
+            //     if (l->rs) l->rs = new_node(*(l->rs));
+            // }
             split(std::move(l->rs), k - sls - 1, l->rs, r);
             push_up(l);
         }
@@ -209,20 +221,20 @@ protected:
 
     Ptr merge(Ptr &&x, Ptr &&y)
     {
-        if (!x) return y;
-        if (!y) return x;
+        if (!x) return std::forward<Ptr>(y);
+        if (!y) return std::forward<Ptr>(x);
         if (((rng() * (x->siz + y->siz)) >> 32) < x->siz) {
             // [[ds_range_opt]]
             push_down(x);
             x->rs = merge(std::move(x->rs), std::forward<Ptr>(y));
             push_up(x);
-            return x;
+            return std::forward<Ptr>(x);
         }
         // [[ds_range_opt]]
         push_down(y);
         y->ls = merge(std::forward<Ptr>(x), std::move(y->ls));
         push_up(y);
-        return y;
+        return std::forward<Ptr>(y);
     }
 
     Ptr *search(Ptr &&x, u32 k)
@@ -231,6 +243,7 @@ protected:
         Ptr *p = &x;
         u32 lsiz;
         while (k) {
+            // [[ds_range_opt]]
             push_down(*p);
             lsiz = (*p)->ls ? (*p)->ls->siz : 0;
             if (lsiz >= k) p = &((*p)->ls);
@@ -340,7 +353,7 @@ template<typename M, typename Alloc = std::allocator<int>>
 
     Ptr root;
     PersistentDynamicSequence(const Ptr &rt): root(rt) { }
-    PersistentDynamicSequence(Ptr &&rt): root(rt) { }
+    PersistentDynamicSequence(Ptr &&rt): root(std::forward<Ptr>(rt)) { }
 
 #define __ds_copy(x) (Base::new_node(*(x)))
 
@@ -584,6 +597,7 @@ struct MonoidAdd
     static S op(S a, S b) { return a + b; }
     static S un() { return 0; }
     static constexpr bool cm = true;
+    static constexpr bool sym = true;
 };
 
 struct ActedMonoid
