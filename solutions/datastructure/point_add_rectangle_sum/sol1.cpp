@@ -1,4 +1,5 @@
 // Leafy K-D Tree 
+// Insert points offline.
 
 #include <iostream>
 #include <cstdio>
@@ -114,61 +115,16 @@ struct KDTree
 #undef KDT_ARGS
 };
 
-template<typename PT, typename M, u32 K = tuple_size<PT>::value>
-struct KDForest
-{
-    using S = typename M::S;
-    using KDT = KDTree<PT, M, K>;
-
-    vec<KDT> f;
-    
-    KDForest(): f() { }
-    
-    void push_back(const PT &v, const S &w)
-    {
-        u32 ns = 1;
-        vec<PT> p(1, v);
-        vec<S> s(1, w);
-        while (f.size() > 1 && f.back().n == ns) {
-            p.resize(ns * 2), s.resize(ns * 2);
-            auto &nw = f.back();
-            for (u32 i = 0; i < ns; i++) {
-                auto &v = nw.t[nw.rnk[i] + ns];
-                p[ns * 2 - i - 1] = v.sp;
-                s[ns * 2 - i - 1] = v.val;
-            }
-            ns *= 2;
-            f.pop_back();
-        }
-        f.emplace_back(ns, p, s);
-    }
-
-    S prod(const PT &st, const PT &ed)
-    {
-        S res = M::un();
-        for (auto &t: f) {
-            res = M::op(res, t.prod(st, ed));
-        }
-        return res;
-    }
-
-    void set(u32 x, const S &s)
-    {
-        for (auto &t: f) {
-            if (x < t.n) {
-                t.set(x, s);
-                break;
-            }
-            x -= t.n;
-        }
-    }
-};
-
 struct MonoidSum
 {
     using S = u64;
     static S op(S a, S b) { return a + b; }
     static S un() { return 0; }
+};
+
+struct Query
+{
+    u32 op, a, b, c, d;
 };
 
 signed main() 
@@ -178,19 +134,27 @@ signed main()
     using Point = pair<u32, u32>;
     u32 n, q;
     cin >> n >> q;
-    KDForest<Point, MonoidSum> t;
+    vec<Point> pt;
+    vec<u64> v;
+    vec<Query> qr(q);
     for (u32 i = 0, x, y, z; i < n; i++) {
         cin >> x >> y >> z;
-        t.push_back({x, y}, z);
+        pt.emplace_back(x, y);
+        v.emplace_back(z);
     }
-    u32 op, a, b, c, d;
-    while (q--) {
+    for (auto &[op, a, b, c, d]: qr) {
         cin >> op >> a >> b >> c;
-        if (op == 0) t.push_back({a, b}, c);
+        if (op == 1) cin >> d;
         else {
-            cin >> d;
-            cout << t.prod({a, b}, {c - 1, d - 1}) << '\n';
+            pt.emplace_back(a, b);
+            v.emplace_back(0);
+            a = pt.size() - 1, b = c;
         }
+    }
+    KDTree<Point, MonoidSum> t(pt.size(), pt, v);
+    for (auto [op, a, b, c, d]: qr) {
+        if (op == 0) t.set(a, b);
+        else cout << t.prod({a, b}, {c - 1, d - 1}) << '\n';
     }
     return 0;
 }
