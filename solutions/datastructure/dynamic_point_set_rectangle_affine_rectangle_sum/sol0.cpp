@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstring>
 #include <algorithm>
+#include <tuple>
 #include <atcoder/modint>
 using namespace std;
 
@@ -21,12 +22,13 @@ struct LazyKDTree
 #define KDT_ARGS const PT& a, const PT& b, index_sequence<Is...>
 
     template <size_t... Is> 
-    PT min_pt(KDT_ARGS) { return { min(get<Is>(a), get<Is>(b))... }; }
+    PT min_pt(KDT_ARGS) {return { min(std::get<Is>(a), std::get<Is>(b))... };}
     template <size_t... Is> 
-    PT max_pt(KDT_ARGS) { return { max(get<Is>(a), get<Is>(b))... }; }
+    PT max_pt(KDT_ARGS) {return { max(std::get<Is>(a), std::get<Is>(b))... };}
 
     template <size_t... Is> 
-    bool cle_pt_impl(KDT_ARGS) { return ((get<Is>(a) <= get<Is>(b)) && ...); }
+    bool cle_pt_impl(KDT_ARGS) 
+        { return ((std::get<Is>(a) <= std::get<Is>(b)) && ...); }
     bool cle_pt(const PT& a, const PT& b){ return cle_pt_impl(a, b, KDT_MIS); }
 
     using MS = typename M::MS;
@@ -103,7 +105,8 @@ struct LazyKDTree
         }
         u32 mid = (l + r) >> 1;
         nth_element(idx.data() + l, idx.data() + mid, idx.data() + r, 
-            [&p](u32 a, u32 b) { return get<D>(p[a]) < get<D>(p[b]); });
+            [&p](u32 a, u32 b) 
+            { return std::get<D>(p[a]) < std::get<D>(p[b]); });
         build_rec<(D + 1) % K>(p, s, idx, l, mid, x * 2);
         build_rec<(D + 1) % K>(p, s, idx, mid, r, x * 2 + 1);
         d[x].sp = min_pt(d[x * 2].sp, d[x * 2 + 1].sp, KDT_MIS);
@@ -116,7 +119,7 @@ private:
     S prod_rec(const PT &st, const PT &ed, u32 l, u32 r, u32 x)
     {
         if (cle_pt(st, d[x].sp) && cle_pt(d[x].ep, ed)) return d[x].val;
-        if (!cle_pt(d[x].sp, ed) || !cle_pt(st, d[x].ep)) return M::un();
+        if (!cle_pt(d[x].sp, ed) || !cle_pt(st, d[x].ep)) return MS::un();
         u32 mid = (l + r) >> 1;
         push_down(x, mid - l, r - mid);
         return MS::op(prod_rec(st, ed, l, mid, x * 2), 
@@ -150,7 +153,7 @@ private:
         d[x].val = MS::op(d[x * 2].val, d[x * 2 + 1].val);
     }
 
-    void get_rec(u32 p, u32 l, u32 r, u32 x)
+    S get_rec(u32 p, u32 l, u32 r, u32 x)
     {
         if (l + 1 == r) return d[x].val;
         u32 mid = (l + r) >> 1;
@@ -192,7 +195,7 @@ struct LazyKDForest
         u32 ns = 1;
         vec<PT> p(1, v);
         vec<S> s(1, w);
-        while (f.size() > 1 && f.back().n == ns) {
+        while (!f.empty() && f.back().n == ns) {
             p.resize(ns * 2), s.resize(ns * 2);
             auto &nw = f.back();
             for (u32 i = 1, len = ns; i < ns; i++) {
@@ -200,21 +203,23 @@ struct LazyKDForest
                 nw.push_down(i, len, len);
             }
             for (u32 i = 0; i < ns; i++) {
-                auto &v = nw.d[nw.rnk[i] + ns];
-                p[ns * 2 - i - 1] = v.sp;
-                s[ns * 2 - i - 1] = v.val;
+                auto &d = nw.d[nw.rnk[i] + ns];
+                p[ns * 2 - i - 1] = d.sp;
+                s[ns * 2 - i - 1] = d.val;
             }
             ns *= 2;
             f.pop_back();
         }
+        reverse(p.begin(), p.end());
+        reverse(s.begin(), s.end());
         f.emplace_back(ns, p, s);
     }
 
     S prod(const PT &st, const PT &ed)
     {
-        S res = M::un();
+        S res = M::MS::un();
         for (auto &d: f) {
-            res = M::op(res, d.prod(st, ed));
+            res = M::MS::op(res, d.prod(st, ed));
         }
         return res;
     }

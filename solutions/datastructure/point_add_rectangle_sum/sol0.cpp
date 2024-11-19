@@ -129,17 +129,19 @@ struct KDForest
         u32 ns = 1;
         vec<PT> p(1, v);
         vec<S> s(1, w);
-        while (f.size() > 1 && f.back().n == ns) {
+        while (!f.empty() && f.back().n == ns) {
             p.resize(ns * 2), s.resize(ns * 2);
             auto &nw = f.back();
             for (u32 i = 0; i < ns; i++) {
-                auto &v = nw.t[nw.rnk[i] + ns];
-                p[ns * 2 - i - 1] = v.sp;
-                s[ns * 2 - i - 1] = v.val;
+                auto &d = nw.t[nw.rnk[i] + ns];
+                p[ns * 2 - i - 1] = d.sp;
+                s[ns * 2 - i - 1] = d.val;
             }
             ns *= 2;
             f.pop_back();
         }
+        reverse(p.begin(), p.end());
+        reverse(s.begin(), s.end());
         f.emplace_back(ns, p, s);
     }
 
