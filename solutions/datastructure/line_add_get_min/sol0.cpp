@@ -72,7 +72,7 @@ struct LiChaoSegmentTree
 
     void add_func(const F &f)
     {
-        add_func_at(1, f);
+        if (n) add_func_at(1, f);
     }
 
     void add_func(const F &f, u32 l, u32 r)

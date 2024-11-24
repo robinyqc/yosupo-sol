@@ -16,7 +16,7 @@ template<typename T> using vec = vector<T>;
 using mint = atcoder::modint998244353;
 
 // newton's method
-vec<mint> inv_poly(vec<mint> a, u32 tlen)
+vec<mint> inv_poly(const vec<mint> &a, u32 tlen)
 {
     vec<mint> res(1, a[0].inv());
     while (res.size() < tlen) {
@@ -53,11 +53,25 @@ vec<mint> poly_div(vec<mint> a, vec<mint> b)
     if (n < m) return {};
     reverse(a.begin(), a.end());
     reverse(b.begin(), b.end());
-    b = inv_poly(std::move(b), n - m + 1);
+    b = inv_poly(b, n - m + 1);
     b.resize(n - m + 1);
     a.resize(n - m + 1);
     a = atcoder::convolution(a, b);
     return {a.rend() - n + m - 1, a.rend()};
+}
+
+// a - b * q
+vec<mint> poly_div_remainder(vec<mint> a, const vec<mint> &b, vec<mint> q)
+{
+    q = atcoder::convolution(b, q);
+    for (u32 i = 0; i < q.size(); i++) a[i] -= q[i];
+    while (a.size() && a.back().val() == 0) a.pop_back();
+    return a;
+}
+
+vec<mint> poly_mod(const vec<mint> &a, const vec<mint> &b)
+{
+    return poly_div_remainder(a, b, poly_div(a, b));
 }
 
 signed main() 
@@ -69,14 +83,11 @@ signed main()
     vec<mint> a(n), b(m);
     for (auto &i: a) cin >> x, i = mint::raw(x);
     for (auto &i: b) cin >> x, i = mint::raw(x);
-    auto q(poly_div(a, b));
-    b = atcoder::convolution(q, b);
-    for (u32 i = 0; i < b.size(); i++) a[i] -= b[i];
-    while (a.size() && a.back() == 0) a.pop_back();
-    cout << q.size() << ' ' << a.size() << endl;
+    auto q(poly_div(a, b)), r(poly_div_remainder(std::move(a), b, q));
+    cout << q.size() << ' ' << r.size() << endl;
     for (auto i: q) cout << i.val() << ' ';
     cout << endl;
-    for (auto i: a) cout << i.val() << ' ';
+    for (auto i: r) cout << i.val() << ' ';
     cout << endl;
     return 0;
 }

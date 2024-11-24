@@ -16,7 +16,7 @@ template<typename T> using vec = vector<T>;
 using mint = atcoder::modint998244353;
 
 // newton's method
-vec<mint> inv_poly(vec<mint> a, u32 tlen)
+vec<mint> inv_poly(const vec<mint> &a, u32 tlen)
 {
     vec<mint> res(1, a[0].inv());
     while (res.size() < tlen) {
@@ -78,13 +78,13 @@ vec<mint> der_poly(vec<mint> a)
 vec<mint> log_poly(vec<mint> a, u32 tlen)
 {
     auto b(der_poly(a));
-    a = inv_poly(std::move(a), tlen);
+    a = inv_poly(a, tlen);
     a = atcoder::convolution(b, a);
     a.resize(tlen - 1);
     return int_poly(std::move(a));
 }
 
-vec<mint> exp_poly(vec<mint> a, u32 tlen)
+vec<mint> exp_poly(const vec<mint> &a, u32 tlen)
 {
     vec<mint> res(1, mint::raw(1));
     while (res.size() < tlen) {

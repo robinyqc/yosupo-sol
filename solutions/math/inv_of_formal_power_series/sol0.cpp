@@ -16,7 +16,7 @@ template<typename T> using vec = vector<T>;
 using mint = atcoder::modint998244353;
 
 // newton's method
-vec<mint> inv_poly(vec<mint> a, u32 tlen)
+vec<mint> inv_poly(const vec<mint> &a, u32 tlen)
 {
     vec<mint> res(1, a[0].inv());
     while (res.size() < tlen) {
