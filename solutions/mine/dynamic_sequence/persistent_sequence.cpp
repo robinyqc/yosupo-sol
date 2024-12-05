@@ -266,10 +266,10 @@ protected:
         while (*p) {
             // [[ds_range_opt]]
             push_down(*p);
-            if ((*p)->ls && f(M::op(lval, (*p)->ls->val))) p = &((*p)->ls);
+            if ((*p)->ls && f(M::op(lval, (*p)->ls->prd))) p = &((*p)->ls);
             else {
                 if ((*p)->ls) {
-                    lval = M::op(lval, (*p)->ls->val);
+                    lval = M::op(lval, (*p)->ls->prd);
                     res += (*p)->ls->siz;
                 }
                 if (f(M::op(lval, (*p)->val))) return res;
@@ -520,6 +520,8 @@ public:
         split(__ds_copy(root), x + 1, mid, suf);
         split(std::move(mid), x, pre, mid);
         mid->val = s;
+        // [[ds_prd]]
+        mid->prd = s;
         return merge(merge(std::move(pre), std::move(mid)), std::move(suf));
     }
 
