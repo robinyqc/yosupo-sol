@@ -23,10 +23,14 @@ template<unsigned P> struct ModInt
         val = (u64)val * t.val % P;
         return *this;
     }
+    constexpr mint &operator/=(mint t) { return (*this) *= t.inv(); }
+    constexpr mint operator+() const { return (*this); }
+    constexpr mint operator-() const { return P - val; }
     friend constexpr mint operator+(mint a, mint b) { return a += b; }
     friend constexpr mint operator-(mint a, mint b) { return a -= b; }
     friend constexpr mint operator*(mint a, mint b) { return a *= b; }
-    
+    friend constexpr mint operator/(mint a, mint b) { return a /= b; }
+
     constexpr mint pow(u32 y) const
     {
         u64 res = 1, x = val;
@@ -36,9 +40,9 @@ template<unsigned P> struct ModInt
         }
         return mint(res);
     }
-    
+
     constexpr mint inv() const { return pow(P - 2); }
-    
+
     friend constexpr bool operator==(mint a, mint b) { return a.val == b.val; }
     friend constexpr bool operator!=(mint a, mint b) { return a.val != b.val; }
 };
