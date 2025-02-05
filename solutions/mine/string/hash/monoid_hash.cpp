@@ -53,10 +53,9 @@ struct ModInt61
 unsigned long long hash_default_seed()
 {
     static std::mt19937_64 gen(time(0));
-    unsigned long long x;
-    do x = gen() % ((1ull << 61) - 1);
-    while (x == 0);
-    return x;
+    static std::uniform_int_distribution
+        <unsigned long long> dist(1, (1ull << 61) - 2);
+    return dist(gen);
 }
 
 struct MonoidHash
@@ -77,6 +76,6 @@ struct MonoidHash
     {
         return {x.first * y.first, x.second * y.first + y.second};
     }
-    static constexpr S unit() { return {1, 0}; }
+    static constexpr S un() { return {1, 0}; }
     static constexpr bool cm = false;
 };
